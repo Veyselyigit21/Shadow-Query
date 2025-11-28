@@ -1,20 +1,33 @@
-# 🛡️ LocalAI SQL Injection Scanner v4.1 (Stealth Edition)
-
+# 🛡️ AI-Powered Web Security Toolkit (LocalLLM Edition)
 Bu proje python tabanlı gelişmiş bir SQL Injection tarama aracıdır.
 
 Geleneksel tarayıcıların aksine, **"Stealth First" (Önce Gizlilik)** prensibiyle çalışır ve WAF (Güvenlik Duvarı) tespitini minimize etmek için akıllı durdurma mekanizmasına sahiptir.
 
-## 🚀 Özellikler
+Bu depo (repository), ofansif siber güvenlik süreçlerini otomatize etmek amacıyla geliştirilmiş Python araçlarını içerir.
 
-* **🕵️‍♂️ Stealth Mode (Gizli Mod):** İlk zafiyet tespit edildiği anda taramayı durdurur. Bu sayede gereksiz gürültü yapmaz ve IP engellenme riskini düşürür.
-* **⏱️ Time-Based Detection:** Sadece hata mesajlarına bakmaz, sunucunun tepki süresini (Response Time) ölçerek kör (Blind) SQL açıklarını tespit eder.
-* **📡 OOB (Out-of-Band) Desteği:** DNS ve HTTP etkileşimli payloadları destekler (Listener entegrasyonu ile).
-* **🤖 AI-Generated Logic:** Kod mantığı ve hata yakalama algoritmaları, ofansif siber güvenlik için eğitilmiş LLM'ler tarafından optimize edilmiştir.
-* **📝 Custom Payload:** `payloads.txt` üzerinden tamamen özelleştirilebilir saldırı vektörleri.
+Tüm araçların geliştirme sürecinde, **Local AI (Yerel Yapay Zeka)** modelleri (**WhiteRabbitNeo** ve **Dolphin**) ile pair-programming yapılmış; mantık akışı ve hata yönetimi algoritmaları bu modellerin desteğiyle optimize edilmiştir.
+
+## 🧰 Araçlar
+
+Bu proje şu an için iki ana modülden oluşmaktadır:
+
+### 1. 🕵️‍♂️ Stealth SQL Injection Scanner (v4.1)
+Gelişmiş bir SQL zafiyet tarayıcısıdır.
+* **Özellikler:** Time-Based & Error-Based tespit, OOB (Out-of-Band) desteği.
+* **Stealth Mode:** WAF/Firewall tespitini önlemek için "İlk Zafiyette Durma" (Stop-on-Found) özelliği.
+* **Custom Payload:** `payloads.txt` üzerinden özelleştirilebilir saldırı vektörleri.
+
+### 2. ⚡ Multi-Threaded Admin Panel Finder (v1.0)
+Hedef sitelerin yönetim panellerini tespit etmek için kullanılan hızlı keşif aracı.
+* **Özellikler:** Çoklu iş parçacığı (Multi-threading) ile yüksek hızda tarama.
+* **Akıllı Tespit:** HTTP 200 (OK) ve 302 (Redirect) durum kodlarını analiz eder.
+* **User-Agent Spoofing:** Taramayı gerçek bir tarayıcı gibi göstererek gizlilik sağlar.
+
+---
 
 ## ⚙️ Kurulum
 
-Bu aracı çalıştırmak için Python 3 ve `requests` kütüphanesi gereklidir.
+Araçların çalışması için Python 3 ve `requests` kütüphanesi gereklidir.
 
 ```bash
 # Gerekli kütüphaneyi yükleyin
