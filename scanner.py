@@ -22,7 +22,7 @@ def advanced_sqli_scan_v4_1(target_url, payload_file, callback_url=None):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
 
-input_fields = ['uname', 'pass', 'user_login', 'user_pass', 'email', 'admin_id']
+    input_fields = ['uname', 'pass', 'user_login', 'user_pass', 'email', 'user']
 
     with requests.Session() as s:
         vuln_found = False
