@@ -1,4 +1,4 @@
-# 🛡️ AI-Powered Web Security Toolkit (LocalLLM Edition)
+# 🛡️ Web Security Toolkit (LocalLLM Edition)
 Bu proje python tabanlı gelişmiş bir SQL Injection tarama aracıdır.
 
 Geleneksel tarayıcıların aksine, **"Stealth First" (Önce Gizlilik)** prensibiyle çalışır ve WAF (Güvenlik Duvarı) tespitini minimize etmek için akıllı durdurma mekanizmasına sahiptir.
@@ -32,3 +32,4 @@ Araçların çalışması için Python 3 ve `requests` kütüphanesi gereklidir.
 ```bash
 # Gerekli kütüphaneyi yükleyin
 pip install requests
+
