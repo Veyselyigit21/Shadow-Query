@@ -1,8 +1,8 @@
 # 🛡️ Web Security Toolkit (LocalLLM Edition)
 
-Bu depo (repository), ofansif siber güvenlik süreçlerini otomatize etmek amacıyla geliştirilmiş Python araçlarını içerir.
+Bu depo (repository), ofansif siber güvenlik süreçlerini otomatize etmek ve zafiyet doğrulama (PoC) süreçlerini öğrenmek amacıyla geliştirilmiş Python araçlarını içerir.
 
-Proje, geleneksel kaba kuvvet (brute-force) tarayıcılarının aksine **"Stealth First" (Önce Gizlilik)** prensibiyle çalışır. WAF (Web Application Firewall) tespitini minimize etmek için akıllı durdurma mekanizmalarına ve insan davranışını taklit eden özelliklere sahiptir.
+Proje, **SQL Injection** ve **XSS (Cross-Site Scripting)** zafiyetlerini tespit etmekten, bu zafiyetlerin sömürülmesi (exploitation) ve doğrulanması (verification) aşamalarına kadar uçtan uca bir laboratuvar ortamı sunar.
 
 Tüm araçların geliştirme sürecinde, **Local AI (Yerel Yapay Zeka)** modelleri (**WhiteRabbitNeo** ve **Dolphin**) ile pair-programming yapılmış; mantık akışı ve hata yönetimi algoritmaları bu modellerin desteğiyle optimize edilmiştir.
 
@@ -10,44 +10,50 @@ Tüm araçların geliştirme sürecinde, **Local AI (Yerel Yapay Zeka)** modelle
 
 ## 🧰 Modüller ve Özellikler
 
-Bu proje şu an için birbirini tamamlayan iki ana modülden oluşmaktadır:
+Bu proje birbirini tamamlayan 4 ana modülden oluşmaktadır:
 
-### 1. 🕵️‍♂️ Stealth SQL Injection Scanner (v4.1)
-Gelişmiş, gizlilik odaklı bir SQL zafiyet tarayıcısıdır.
-* **Stealth Mode:** WAF engellemesini önlemek için "İlk Zafiyette Durma" (Stop-on-Found) özelliği.
-* **Gelişmiş Tespit:** Sadece hata mesajlarını (Error-Based) değil, sunucu tepki sürelerini (Time-Based) ölçerek kör noktaları yakalar.
-* **OOB Desteği:** Out-of-Band saldırı vektörlerini (DNS/HTTP Interaction) destekler.
-* **Safe Payload:** Veritabanına zarar vermeyen, sadece okuma/tespit odaklı payload yapısı.
+### 1. 🕵️‍♂️ Vulnerability Scanner & Generator (v6.0)
+SQLi ve XSS zafiyetlerini tarayan ana motordur.
+* **Dual Core:** Hem SQL Injection (Time/Error Based) hem de Reflected XSS taraması yapar.
+* **Stealth Mode:** WAF/Firewall tespitini önlemek için "İlk Zafiyette Durma" özelliği.
+* **Payload Generator:** XSS tespit edildiğinde, manuel test için otomatik saldırı senaryoları (Cookie Stealer, Keylogger kodları) üretir.
 
-### 2. ⚡ Multi-Threaded Admin Panel Finder (v1.0)
-Hedef sitelerin yönetim panellerini tespit etmek için kullanılan hızlı keşif aracı.
-* **Yüksek Hız:** `ThreadPoolExecutor` ile çoklu iş parçacığı (Multi-threading) mimarisi.
-* **Akıllı Analiz:** HTTP 200 (OK) ve 302 (Redirect) durum kodlarını analiz ederek "False Positive" sonuçları eler.
-* **User-Agent Spoofing:** Taramayı gerçek bir tarayıcı gibi göstererek gizlilik sağlar.
+### 2. 📡 C2 Listener (Veri Yakalayıcı)
+XSS saldırıları sonucu sızdırılan verileri yakalamak için çalışan hafif bir sunucudur.
+* **Data Exfiltration:** Hedef tarayıcıdan çalınan Cookie (Oturum) ve Tuş vuruşlarını (Keylogger) dinler.
+* **Loglama:** Yakalanan verileri anlık olarak konsola ve dosyaya kaydeder.
+
+### 3. 🤖 Exploit Verifier (Selenium Bot)
+Tespit edilen XSS açıklarını "gerçek bir tarayıcı" üzerinde doğrulayan otomasyon aracıdır.
+* **Browser Automation:** Selenium kullanarak Chrome tarayıcısını açar ve saldırıyı simüle eder.
+* **PoC Doğrulama:** JavaScript'in (`alert` vb.) gerçekten çalışıp çalışmadığını kanıtlar.
+
+### 4. ⚡ Admin Panel Finder
+* **Multi-Thread:** Yönetim panellerini çoklu iş parçacığı ile hızlıca keşfeder.
+* **Akıllı Analiz:** HTTP 200/302 durumlarını analiz ederek gizli giriş kapılarını bulur.
 
 ---
 
-## 🔄 Entegre Kullanım Senaryosu (Attack Chain)
+## 🔄 Entegre Kullanım Senaryoları (Attack Chains)
 
-Bu toolkit, bir sızma testi (Pentest) senaryosunda **Keşif (Reconnaissance)** ve **Sömürü (Exploitation)** aşamalarını birleştirmek için tasarlanmıştır.
+### Senaryo A: SQL Injection ile Yetki Yükseltme
+1.  **Keşif:** `Admin Panel Finder` ile giriş paneli bulunur.
+2.  **Sömürü:** `Scanner v6.0` (SQL Modu) ile panel taranır.
+3.  **Sonuç:** Authentication Bypass zafiyeti ile şifresiz Admin girişi sağlanır.
 
-**Hedef:** Sistemde yetkisiz erişim (Unauthorized Access) elde etmek veya Authentication Bypass zafiyetini doğrulamak.
-
-1.  **Adım (Keşif):** `Admin Panel Finder` aracı ile hedef sitenin yönetim paneli giriş noktası (Örn: `/admin/login.php`) tespit edilir.
-2.  **Adım (Analiz):** Bulunan giriş panelindeki input alanları (örn: `name="uname"`, `name="pass"`) analiz edilir ve scanner'a tanımlanır.
-3.  **Adım (Sömürü):** `SQL Injection Scanner` tespit edilen panele yönlendirilir.
-    * Araç, giriş formunda **Authentication Bypass** (Kimlik Doğrulama Atlatma) zafiyeti arar.
-    * Başarılı olursa, parola bilinmese dahi sisteme **Admin yetkileriyle** giriş yapılması simüle edilir.
-
-> **Eğitim Notu:** Bu senaryo, "SQL Injection ile Authentication Bypass" zafiyetinin (CWE-287) ne kadar kritik olduğunu ve `Prepared Statements` kullanılmamasının risklerini göstermektedir.
+### Senaryo B: XSS ile Oturum Çalma (Session Hijacking)
+1.  **Tespit:** `Scanner v6.0` (XSS Modu) zafiyeti bulur ve "Cookie Stealer" payload'ı üretir.
+2.  **Hazırlık:** `listener.py` başlatılarak dinleme moduna geçilir.
+3.  **Doğrulama:** `exploit_verifier.py` (veya manuel test) ile payload hedefe gönderilir.
+4.  **Sonuç:** Listener ekranına kurbanın Oturum Çerezi (Session Cookie) düşer.
 
 ---
 
 ## ⚙️ Kurulum
 
-Araçların çalışması için Python 3 ve `requests` kütüphanesi gereklidir.
+Araçların çalışması için Python 3 ve aşağıdaki kütüphaneler gereklidir.
+*(Selenium, tarayıcı otomasyonu için eklenmiştir)*
 
 ```bash
-# Gerekli kütüphaneyi yükleyin
-pip install requests
-
+# Gerekli tüm kütüphaneleri yükleyin
+pip install requests selenium webdriver-manager
